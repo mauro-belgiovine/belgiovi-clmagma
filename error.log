@@ -1,0 +1,12 @@
+( cd control          && make )
+make[1]: Entering directory `/home/GUEST/belgiovi/clmagma-1.0/control'
+g++ -O0 -DADD_ -g -Wall -DGPUSHMEM=200 -DHAVE_clAmdBlas -DHAVE_CBLAS -I/home/GUEST/belgiovi/clAmdBlas-1.10.321/include -I /opt/cuda-5.0/include -I../include -c zpanel_to_q.cpp -o zpanel_to_q.o
+g++ -O0 -DADD_ -g -Wall -DGPUSHMEM=200 -DHAVE_clAmdBlas -DHAVE_CBLAS -I/home/GUEST/belgiovi/clAmdBlas-1.10.321/include -I /opt/cuda-5.0/include -I../include -c zprint.cpp -o zprint.o
+g++ -O0 -DADD_ -g -Wall -DGPUSHMEM=200 -DHAVE_clAmdBlas -DHAVE_CBLAS -I/home/GUEST/belgiovi/clAmdBlas-1.10.321/include -I /opt/cuda-5.0/include -I../include -c magma_zf77.cpp -o magma_zf77.o
+ifort -O0 -DADD_ -g -Wall -x f95-cpp-input -Dmagma_devptr_t="integer(kind=8)" -I/home/GUEST/belgiovi/clAmdBlas-1.10.321/include -I /opt/cuda-5.0/include -I../include -c magma_param.f90 -o magma_param.o
+ifort: command line warning #10157: ignoring option '-W'; argument is of wrong type
+ifort: command line warning #10155: ignoring option '-x'; argument required
+ifort: error #10236: File not found:  'f95-cpp-input'
+make[1]: *** [magma_param.o] Error 1
+make[1]: Leaving directory `/home/GUEST/belgiovi/clmagma-1.0/control'
+make: *** [libmagma] Error 2

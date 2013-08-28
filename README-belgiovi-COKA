@@ -1,0 +1,62 @@
+/*-------------------------------------------------------------------------------
+
+                                LISTA MODIFICHE MAKEFILE PER CLMAGMA 1.0.0
+
+        ambiente:
+                . Intel i5 quad-core
+                . NVIDIA Quadro 600
+                . Linux Fedora 17
+                . OpenCL 1.2
+                . NVRM version: NVIDIA UNIX x86_64 Kernel Module  304.51
+                . GCC version:  gcc version 4.7.2 20120921 (Red Hat 4.7.2-2) (GCC)
+
+
+-------------------------------------------------------------------------------*/
+
+1) copia make.inc (in questa stessa cartella)
+        modifiche: flag, acmlroot, clamdblas root (versione reale 1.8, la 1.6 e' solo riferita al nome della cartella)
+
+2) copia Makefile.internal
+        modifiche:
+        ...
+        #OPTS   += -DGPUSHMEM=200 -DHAVE_CUBLAS
+        OPTS   += -DGPUSHMEM=200 -DHAVE_clAmdBlas -DHAVE_CBLAS
+        ...
+
+3) modifica dei file interface_opencl/d*.cl
+        inserito:
+        #pragma OPENCL EXTENSION cl_khr_fp64 : enable
+
+4) inserimento delle seguenti variabili globali in .bash_profile
+
+        # clMAGMA dependencies export at startup in LD_LIBRARY_PATH
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/acml5.2.0/gfortran64/lib:/opt/acml5.2.0/gfortran64_mp/lib:/opt/clAmdBlas-1.6.236/lib64
+        export MAGMA_CL_DIR=$HOME/clmagma-1.0.0/interface_opencl
+
+5) make clean && make
+
+/* -----------------------------------------------------------------------------
+
+                  ISTRUZIONI SPECIFICHE PER HOST COKA rd-coka-01
+
+--------------------------------------------------------------------------------*/
+
+1) caricare il modulo ips-xe-2013 e cuda con il seguente comando
+
+	module load ips-xe-2013 cuda
+
+2) settare appropriatamente LD_CONFIG_PATH
+
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/GUEST/belgiovi/clAmdBlas-1.10.321/lib64
+	export MAGMA_CL_DIR=/home/GUEST/belgiovi/clmagma-1.0.0/interface_opencl/
+
+NOTA: MAGMA_CL_DIR contiene il percorso di interface_opencl/ all'interno della libreria compilata
+
+Per compilare eseguire i comandi tramite lista coka o devel-coka (interattiva) dalla cartella interessata
+	
+	bsub -I -q coka-devel -m "rd-coka-01" make
+
+e lanciare testing con lo stesso comando (bsub).
+
+Per visionare job attivi in coda utilizzare bjobs (utente) o bqueue (per le code) (VEDI MANUALE HOST COKA)
+
