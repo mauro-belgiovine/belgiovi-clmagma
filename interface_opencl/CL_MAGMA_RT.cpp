@@ -216,6 +216,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 		printf("\t- %s Device Global Mem Size: %ld\n", label,globalMem);
 		clGetDeviceInfo(*devices[y], CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(cl_ulong), &globalMem, NULL);
 		printf("\t- %s Device Max Alloc Mem Size: %ld\n", label,globalMem);*/
+		//TODO: check why gives segfault on second initialization
 		// create command-queues per GPU
 		// create command queue
 		*queue[y] = clCreateCommandQueue(*context, *devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
