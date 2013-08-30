@@ -205,7 +205,12 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 	  } else {
 	    
 	    // show info for each device in the context and init queue
-	    *queue = new cl_command_queue[n_device];
+	    //*queue = new cl_command_queue[n_device];
+	    cl_command_queue *new_queue = &(*queue);
+	    new_queue = new cl_command_queue[n_device];
+	    
+	    
+	    
 	    //CHECK ------> http://dhruba.name/2012/10/14/opencl-cookbook-how-to-leverage-multiple-devices-in-opencl/
 		
 	    for(unsigned int y = 0; y < n_device; y++ ) {
@@ -220,7 +225,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 		//TEST: test
 		// create command-queues per GPU
 		// create command queue
-		*queue[y] = clCreateCommandQueue(*context, *devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
+		new_queue[y] = clCreateCommandQueue(*context, *devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
 		printf("after %s %d create queue;\n", label, y);
 		fflush(stdout);
 		
