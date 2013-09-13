@@ -39,6 +39,7 @@ class cl_platform {
 		cl_platform();	//constructor
 		cl_platform(const cl_platform &old_platform);	//copy constructor
 		~cl_platform(); //destructor
+		friend struct FindPlatformID;
 };
 
 //classe per la ricerca dell'indice della piattaforma
