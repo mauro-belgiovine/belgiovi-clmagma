@@ -16,12 +16,15 @@ int main( int argc, char** argv )
 	uint i;
 	cl_platform_id arch_compiling = NULL;
 	for(i = 0; i < runtime->GetNumPlatform(); i++){
-	  printf("prima di SetPlatform ok\n" );
-	  arch_compiling = runtime->SetPlatform(i, CL_DEVICE_TYPE_GPU);
-	  printf("dopo di SetPlatform ok\n" );
+	  
+		arch_compiling = runtime->SetPlatform(i, CL_DEVICE_TYPE_GPU);
+	  
 	  if (arch_compiling != NULL) runtime->CompileFile( argv[1] );
-	  arch_compiling = runtime->SetPlatform(i, CL_DEVICE_TYPE_CPU);
-	  if (arch_compiling != NULL) runtime->CompileFile( argv[1] );
+	  
+	  /*arch_compiling = runtime->SetPlatform(i, CL_DEVICE_TYPE_CPU);
+	  
+	  if (arch_compiling != NULL) runtime->CompileFile( argv[1] );*/
+	  
 	  arch_compiling = NULL;
 	}
 	

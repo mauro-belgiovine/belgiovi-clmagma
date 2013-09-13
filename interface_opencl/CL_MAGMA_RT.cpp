@@ -17,6 +17,46 @@ using std::vector;
 // define number of command queues to create
 #define QUEUE_COUNT 1
 
+
+//cl_platform class: function definition
+
+//constructor for cl_platform class, with void argument
+inline cl_platform::cl_platform(){
+	n_gpu = n_cpu = n_acc = 0;
+	platform = NULL;
+	gpu_devices = NULL;
+	gpu_context = NULL;
+	gpu_queue = NULL;
+	cpu_devices = NULL;
+	cpu_context = NULL;
+	cpu_queue = NULL;
+	acc_devices = NULL;
+	acc_context = NULL;
+	acc_queue = NULL;
+}
+
+inline cl_platform::cl_platform(const cl_platform &old_platform){
+	
+}
+
+inline cl_platform::~cl_platform(){
+	
+	for(uint y = 0; y < n_gpu; y++) clReleaseCommandQueue(gpu_queue[y]);
+	if (gpu_queue)	delete [] gpu_queue;
+	if(gpu_devices)	delete [] gpu_devices;
+	if(gpu_context)	clReleaseContext(gpu_context);
+	for(uint y = 0; y < n_cpu; y++) clReleaseCommandQueue(cpu_queue[y]);
+	if (cpu_queue)	delete [] cpu_queue;
+	if(cpu_devices)	delete [] cpu_devices;
+	if(cpu_context)	clReleaseContext(cpu_context);
+	for(uint y = 0; y < n_acc; y++) clReleaseCommandQueue(acc_queue[y]);
+	if (acc_queue)	delete [] acc_queue;
+	if(acc_devices)	delete [] acc_devices;
+	if(acc_context)	clReleaseContext(acc_context);
+}
+
+//------------------------------------------------------------------------------------------------//
+
 /* 
  * constructor
  */
@@ -56,16 +96,7 @@ CL_MAGMA_RT::~CL_MAGMA_RT()
 	if(cpPlatforms.size() > 0) {
 	  uint size = cpPlatforms.size();
 	  for(int i = 0; i < size; i++){
-	    cl_platform platform = cpPlatforms.at(i);
-	    if (platform.gpu_queue)	delete [] platform.gpu_queue;
-	    if(platform.gpu_devices)	delete [] platform.gpu_devices;
-	    if(platform.gpu_context)	clReleaseContext(platform.gpu_context);
-	    if (platform.cpu_queue)	delete [] platform.cpu_queue;
-	    if(platform.cpu_devices)	delete [] platform.cpu_devices;
-	    if(platform.cpu_context)	clReleaseContext(platform.cpu_context);
-	    if (platform.acc_queue)	delete [] platform.acc_queue;
-	    if(platform.acc_devices)	delete [] platform.acc_devices;
-	    if(platform.acc_context)	clReleaseContext(platform.acc_context);
+	    	//TODO: chiamare distruttore per ogni cl_platform
 	  }
 	  cpPlatforms.clear();
 	  
@@ -97,32 +128,31 @@ cl_platform_id CL_MAGMA_RT::SetPlatform(uint platformid, cl_device_type device_t
     switch(device_type){
       
       case CL_DEVICE_TYPE_CPU:
-	if(platform.n_cpu > 0){
-	  cxGPUContext  = platform.cpu_context;
-	  commandQueue  = platform.cpu_queue;
-	  cdDevices = platform.cpu_devices;
-	  ciDeviceCount = platform.n_cpu;
-	  dev_type = CL_DEVICE_TYPE_CPU;
-	  platform_id = platformid;
-	  out_p = platform.platform;
-	}else {
-	  std::cerr << "[WARNING] CPUs not found in platform " << platformid << ": you should try setting default GPUs Platform\n";
-	}
-	break;
+		if(platform.n_cpu > 0){
+		cxGPUContext  = platform.cpu_context;
+		commandQueue  = platform.cpu_queue;
+		cdDevices = platform.cpu_devices;
+		ciDeviceCount = platform.n_cpu;
+		dev_type = CL_DEVICE_TYPE_CPU;
+		platform_id = platformid;
+		out_p = platform.platform;
+		}else {
+		std::cerr << "[WARNING] CPUs not found in platform " << platformid << ": you should try setting default GPUs Platform\n";
+		}
+		break;
 	
       default:
-	if(platform.n_gpu > 0){
-	  cxGPUContext  = platform.gpu_context;
-	  commandQueue  = platform.gpu_queue;
-	  cdDevices = platform.gpu_devices;
-	  //TODO: controllare sollevamento eccezione std::bad_alloc per ciDeviceCount > 1 
-	  ciDeviceCount = platform.n_gpu;
-	  dev_type = CL_DEVICE_TYPE_GPU;
-	  platform_id = platformid;
-	  out_p = platform.platform;
-	}else{
-	  std::cerr << "[WARNING] GPUs not found in platform "<< platformid << ".\n";
-	}
+		if(platform.n_gpu > 0){
+			cxGPUContext  = platform.gpu_context;
+			commandQueue  = platform.gpu_queue;
+			cdDevices = platform.gpu_devices;
+			ciDeviceCount = platform.n_gpu;
+			dev_type = CL_DEVICE_TYPE_GPU;
+			platform_id = platformid;
+			out_p = platform.platform;
+		}else{
+			std::cerr << "[WARNING] GPUs not found in platform "<< platformid << ".\n";
+		}
     }
     
     //NOTE se abbiamo generato la mappa dei kernel, sostituiamola con quella della piattaforma inizializzata
@@ -168,7 +198,7 @@ cl_context CL_MAGMA_RT::GetContext()
 //edit
 bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** devices, cl_context* context,  cl_uint* num, cl_command_queue** queue, cl_device_type device_type, cl_uint max_ndev, cl_int *ciErrNum, char* label){
   
-  char chBuffer[1024];
+  char chBuffer[512];
   cl_uint n_device = 0;
   //check args
   if(max_ndev < 1){
@@ -187,53 +217,62 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
   }else{// Get and log the OpenCL device ID's
 	 
     printf(" %u %s devices found supporting OpenCL:\n\n", n_device, label);
-    *devices = new cl_device_id[n_device];
-    if(*devices == NULL){  
-	printf(" Failed to allocate memory for devices !!!\n\n");
-	return false;
+    cl_device_id *new_devices = new cl_device_id[n_device];
+	
+    if(new_devices == NULL){  
+		printf(" Failed to allocate memory for devices !!!\n\n");
+		return false;
     }else{
+		
 	*num = n_device;
-	*ciErrNum = clGetDeviceIDs (src_platform, device_type, n_device, (cl_device_id *) *devices, NULL);
+	*ciErrNum = clGetDeviceIDs (src_platform, device_type, n_device, (cl_device_id *) new_devices, NULL);
 	
 	if (*ciErrNum == CL_SUCCESS){
 	  //Create a context for the devices
 	  cl_context_properties properties[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties) src_platform, 0 };
-	  *context = clCreateContext( properties, n_device, *devices, NULL, NULL, ciErrNum );
+	  *context = clCreateContext( properties, n_device, new_devices, NULL, NULL, ciErrNum );
+
 	  if (*ciErrNum != CL_SUCCESS){
 	    printf("Error %i in clCreateContext (%s) call !!!\n\n", *ciErrNum, label);
+		
 	    return false;
 	  } else {
-	    
+	
 	    // show info for each device in the context and init queue
-	    //*queue = new cl_command_queue[n_device];
-	    cl_command_queue *new_queue = &(*queue);
-	    new_queue = new cl_command_queue[n_device];
-	    
-	    
-	    
-	    //CHECK ------> http://dhruba.name/2012/10/14/opencl-cookbook-how-to-leverage-multiple-devices-in-opencl/
+		//CHECK ------> http://dhruba.name/2012/10/14/opencl-cookbook-how-to-leverage-multiple-devices-in-opencl/
+		magma_queue_t* new_queue = (magma_queue_t *) new magma_queue_t[n_device];
+		
+		if(new_queue == NULL){
+			printf(" Failed to allocate memory for devices !!!\n\n");
+			return false;
+		}
 		
 	    for(unsigned int y = 0; y < n_device; y++ ) {
-		clGetDeviceInfo(*devices[y], CL_DEVICE_NAME, 1024, &chBuffer, NULL);
-		printf("\t- %s Device %s\n", label, chBuffer);
-		/*cl_ulong globalMem = 0;
-		clGetDeviceInfo(*devices[y], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(cl_ulong), &globalMem, NULL);
-		printf("\t- %s Device Global Mem Size: %ld\n", label,globalMem);
-		clGetDeviceInfo(*devices[y], CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(cl_ulong), &globalMem, NULL);
-		printf("\t- %s Device Max Alloc Mem Size: %ld\n", label,globalMem);*/
-		//TODO: check why gives segfault on second initialization
-		//TEST: test
-		// create command-queues per GPU
-		// create command queue
-		new_queue[y] = clCreateCommandQueue(*context, *devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
-		printf("after %s %d create queue;\n", label, y);
-		fflush(stdout);
+			cl_uint queue_count;
+			clGetDeviceInfo(new_devices[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
+			printf("\t- %s Device %s\n", label, chBuffer);
+			// create command queue
+			new_queue[y] = clCreateCommandQueue(*context, new_devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
+			clGetCommandQueueInfo(new_queue[y], CL_QUEUE_REFERENCE_COUNT, sizeof(cl_uint), &queue_count, NULL);
+			printf("after %s %d create queue; QUEUE COUNT: %d\n", label, y, queue_count);
 		
-		if (*ciErrNum != CL_SUCCESS){
-                	printf (" Error %i in clCreateCommandQueue call !!!\n\n", *ciErrNum);
-                	return false;
-                }		
+			if (*ciErrNum != CL_SUCCESS){
+				printf (" Error %i in clCreateCommandQueue call: %s !!!\n\n", *ciErrNum, GetErrorCode(*ciErrNum));
+            	return false;
+            }		
 	    }
+		
+		
+		*queue = (cl_command_queue *) &new_queue;
+		*devices = (cl_device_id *) &new_devices;
+		
+		/* *queue = (magma_queue_t *) new magma_queue_t[n_device];
+		*devices = (cl_device_id *) new cl_device_id[n_device];
+		memcpy(*queue, &new_queue, sizeof(new_queue));
+		memcpy(*devices, &new_devices, sizeof(new_devices));
+		delete [] new_queue;
+		delete [] new_devices;*/
+		
 	  }
 	  
 	}else{
@@ -261,12 +300,12 @@ cl_int CL_MAGMA_RT::initPlatform(const cl_platform_id src_platform){
   if(!cpPlatforms.empty()){
     cl_platform current;
     for(cl_int i = 0; i < cpPlatforms.size(); i++){
-	current = cpPlatforms.at(i);
-	if(current.platform == src_platform){
-	    printf("Platform %d already stored. Nothing to do.\n", i);
-	    return i;
-	    
-	}
+		current = cpPlatforms.at(i);
+		if(current.platform == src_platform){
+			printf("Platform %d already stored. Nothing to do.\n", i);
+			return i;
+			
+		}
     }
   }
   
@@ -456,22 +495,7 @@ bool CL_MAGMA_RT::Quit()
 	  uint size = cpPlatforms.size();
 	  for(int i = 0; i < size; i++){
 	    
-	    cl_platform platform = cpPlatforms.at(i);
-	    
-	    for(uint y = 0; y < platform.n_gpu; y++) clReleaseCommandQueue(platform.gpu_queue[y]);
-	    if (platform.gpu_queue)	delete [] platform.gpu_queue;
-	    if(platform.gpu_context)	clReleaseContext(platform.gpu_context);
-	    if(platform.gpu_devices)	delete [] platform.gpu_devices;
-	    
-	    for(uint y = 0; y < platform.n_cpu; y++) clReleaseCommandQueue(platform.cpu_queue[y]);
-	    if (platform.cpu_queue)	delete [] platform.cpu_queue;
-	    if(platform.cpu_context)	clReleaseContext(platform.cpu_context);
-	    if(platform.cpu_devices)	delete [] platform.cpu_devices;
-	    
-	    for(uint y = 0; y < platform.n_acc; y++) clReleaseCommandQueue(platform.acc_queue[y]);
-	    if (platform.acc_queue)	delete [] platform.acc_queue;
-	    if(platform.acc_context)	clReleaseContext(platform.acc_context);
-	    if(platform.acc_devices)	delete [] platform.acc_devices;
+	    //TODO: prendere ogni cp_platform e distruggerla
 	    
 	  }
 	  
@@ -1037,8 +1061,6 @@ bool CL_MAGMA_RT::generateKernelMap(){	//Genera la mappa dei Kernel per la piatt
   return true;
 }
 
-//BELGIOVI end
-
 cl_kernel CL_MAGMA_RT::getKernel(const string kernel_name)
 {
   kernel_map &elMap = BigKernelPool[platform_id][dev_type];
@@ -1393,6 +1415,7 @@ bool CL_MAGMA_RT::Init()
 	return true;
 }
 
+//BELGIOVI end
 
 int CL_MAGMA_RT::GatherFilesToCompile( const char* FileNameList, vector<string>& FileNames)
 {

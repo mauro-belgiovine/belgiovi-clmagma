@@ -53,6 +53,7 @@ cleanall:
 	( cd testing          && $(MAKE) cleanall )
 	#( cd testing/lin      && $(MAKE) cleanall )
 	$(MAKE) cleanall2
+	rm -f core.*
 
 # cleanall2 is a dummy rule to run cleangen at the *end* of make cleanall, so
 # .Makefile.gen files aren't deleted and immediately re-created. see Makefile.gen

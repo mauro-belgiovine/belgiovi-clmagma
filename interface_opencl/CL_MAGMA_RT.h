@@ -15,38 +15,30 @@
 
 #include "magma.h"
 
-//--- MAGMA DEVICE CLASS ---
+//--- OPENCL PLATFORM CLASS --- //
 
-typedef struct cl_platform {
-	cl_platform_id 		platform;
-	cl_uint 		n_gpu;
-	cl_uint 		n_cpu;
-	cl_uint 		n_acc;
-	cl_device_id*		gpu_devices;	//GPU devices
-	cl_context	 	gpu_context;
-	cl_command_queue*	gpu_queue;
-	cl_device_id*		cpu_devices;	//CPU
-	cl_context	 	cpu_context;
-	cl_command_queue*	cpu_queue;
-	cl_device_id*		acc_devices;	//ACCELERATOR
-	cl_context	 	acc_context;
-	cl_command_queue*	acc_queue;
+class cl_platform {
 	
-	cl_platform()
-	{
-	  n_gpu = n_cpu = n_acc = 0;
-	  platform = NULL;
-	  gpu_devices = NULL;
-	  gpu_context = NULL;
-	  gpu_queue = NULL;
-	  cpu_devices = NULL;
-	  cpu_context = NULL;
-	  cpu_queue = NULL;
-	  acc_devices = NULL;
-	  acc_context = NULL;
-	  acc_queue = NULL;
-	}
-}cl_platform;
+	private:
+		cl_platform_id 		platform;
+		cl_uint 		n_gpu;
+		cl_uint 		n_cpu;
+		cl_uint 		n_acc;
+		cl_context	 	gpu_context;
+		cl_context	 	cpu_context;
+		cl_context	 	acc_context;
+		cl_device_id*		gpu_devices;	//GPU devices
+		cl_command_queue*	gpu_queue;
+		cl_device_id*		cpu_devices;	//CPU	
+		cl_command_queue*	cpu_queue;
+		cl_device_id*		acc_devices;	//ACCELERATOR
+		cl_command_queue*	acc_queue;
+	
+	public:
+		cl_platform();	//constructor
+		cl_platform(const cl_platform &old_platform);	//copy constructor
+		~cl_platform(); //destructor
+};
 
 //classe per la ricerca dell'indice della piattaforma
 struct FindPlatformID {
@@ -96,7 +88,7 @@ class CL_MAGMA_RT
 		
 		int GatherFilesToCompile(const char* FileNameList, std::vector<std::string>&);
 		std::string fileToString(const char* FileName);
-		//bool initDevices(cl_platform_id src_platform, cl_device_type device_type, cl_platform* o_platform, cl_uint max_ndev, cl_int *ciErrNum, char* label);
+		
 		//BELGIOVINE
 		bool initDevices(const cl_platform_id src_platform, cl_device_id** devices, cl_context* context, cl_uint* num, cl_command_queue** queue, cl_device_type device_type, cl_uint max_ndev, cl_int* ciErrNum, char* label);
 		cl_int initPlatform(const cl_platform_id src_platform);
