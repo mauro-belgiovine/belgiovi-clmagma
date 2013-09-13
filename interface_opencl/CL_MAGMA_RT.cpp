@@ -107,6 +107,7 @@ CL_MAGMA_RT::CL_MAGMA_RT()
  */
 CL_MAGMA_RT::~CL_MAGMA_RT()
 {
+	
 	if (!HasBeenInitialized)
 		return;
 
@@ -120,12 +121,7 @@ CL_MAGMA_RT::~CL_MAGMA_RT()
 	if(ckKernel)	clReleaseKernel(ckKernel);
 		
 	if(cpPlatforms.size() > 0) {
-	  uint size = cpPlatforms.size();
-	  for(int i = 0; i < size; i++){
-	    	//TODO: chiamare distruttore per ogni cl_platform
-	  }
 	  cpPlatforms.clear();
-	  
 	}
 	
 }
@@ -497,6 +493,9 @@ const char* CL_MAGMA_RT::GetErrorCode(cl_int err)
 
 bool CL_MAGMA_RT::Quit()
 {
+  
+	cl_platform current;
+	
 	if (!HasBeenInitialized)
 		return false;
 
@@ -519,12 +518,6 @@ bool CL_MAGMA_RT::Quit()
 	cxGPUContext = NULL;
 	
 	if(cpPlatforms.size() > 0) {
-	  uint size = cpPlatforms.size();
-	  for(int i = 0; i < size; i++){
-	    
-	    //TODO: prendere ogni cp_platform e distruggerla
-	    
-	  }
 	  
 	  cpPlatforms.clear();
 	  
