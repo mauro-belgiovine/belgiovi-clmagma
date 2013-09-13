@@ -7,6 +7,8 @@
 #include <stdexcept>      // std::out_of_range
 #include <errno.h>
 
+#include <cl.h>
+
 using std::string;
 using std::ofstream;
 using std::ifstream;
@@ -35,8 +37,32 @@ inline cl_platform::cl_platform(){
 	acc_queue = NULL;
 }
 
+//deep copy constructor for cl_platform class
 inline cl_platform::cl_platform(const cl_platform &old_platform){
 	
+	n_gpu = old_platform.n_gpu;
+	n_cpu = old_platform.n_cpu;
+	n_acc = old_platform.n_acc;
+	
+	platform = old_platform.platform;
+	
+	gpu_context = old_platform.gpu_context;
+	gpu_devices = new cl_device_id[n_gpu];
+	for(uint y = 0; y < n_gpu; y++) gpu_devices[y] = old_platform.gpu_devices[y];
+	gpu_queue = new cl_command_queue[n_gpu];
+	for(uint y = 0; y < n_gpu; y++) gpu_queue[y] = old_platform.gpu_queue[y];
+	
+	cpu_context = old_platform.cpu_context;
+	cpu_devices = new cl_device_id[n_cpu];
+	for(uint y = 0; y < n_cpu; y++) cpu_devices[y] = old_platform.cpu_devices[y];
+	cpu_queue = new cl_command_queue[n_cpu];
+	for(uint y = 0; y < n_cpu; y++) cpu_queue[y] = old_platform.cpu_queue[y];
+	
+	acc_context = old_platform.acc_context;
+	acc_devices = new cl_device_id[n_acc];
+	for(uint y = 0; y < n_acc; y++) acc_devices[y] = old_platform.acc_devices[y];
+	acc_queue = new cl_command_queue[n_acc];
+	for(uint y = 0; y < n_acc; y++) acc_queue[y] = old_platform.acc_queue[y];
 }
 
 inline cl_platform::~cl_platform(){
@@ -217,7 +243,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
   }else{// Get and log the OpenCL device ID's
 	 
     printf(" %u %s devices found supporting OpenCL:\n\n", n_device, label);
-    cl_device_id *new_devices = new cl_device_id[n_device];
+    *devices = new cl_device_id[n_device];
 	
     if(new_devices == NULL){  
 		printf(" Failed to allocate memory for devices !!!\n\n");
@@ -225,12 +251,12 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
     }else{
 		
 	*num = n_device;
-	*ciErrNum = clGetDeviceIDs (src_platform, device_type, n_device, (cl_device_id *) new_devices, NULL);
+	*ciErrNum = clGetDeviceIDs (src_platform, device_type, n_device, (cl_device_id *) *devices, NULL);
 	
 	if (*ciErrNum == CL_SUCCESS){
 	  //Create a context for the devices
 	  cl_context_properties properties[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties) src_platform, 0 };
-	  *context = clCreateContext( properties, n_device, new_devices, NULL, NULL, ciErrNum );
+	  *context = clCreateContext( properties, n_device, *devices, NULL, NULL, ciErrNum );
 
 	  if (*ciErrNum != CL_SUCCESS){
 	    printf("Error %i in clCreateContext (%s) call !!!\n\n", *ciErrNum, label);
@@ -240,9 +266,9 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 	
 	    // show info for each device in the context and init queue
 		//CHECK ------> http://dhruba.name/2012/10/14/opencl-cookbook-how-to-leverage-multiple-devices-in-opencl/
-		magma_queue_t* new_queue = (magma_queue_t *) new magma_queue_t[n_device];
+		*queue = (magma_queue_t *) new magma_queue_t[n_device];
 		
-		if(new_queue == NULL){
+		if(*queue == NULL){
 			printf(" Failed to allocate memory for devices !!!\n\n");
 			return false;
 		}
@@ -252,24 +278,25 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 			clGetDeviceInfo(new_devices[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
 			printf("\t- %s Device %s\n", label, chBuffer);
 			// create command queue
-			new_queue[y] = clCreateCommandQueue(*context, new_devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
-			clGetCommandQueueInfo(new_queue[y], CL_QUEUE_REFERENCE_COUNT, sizeof(cl_uint), &queue_count, NULL);
+			*queue[y] = clCreateCommandQueue(*context, *devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
+			clGetCommandQueueInfo(*queue[y], CL_QUEUE_REFERENCE_COUNT, sizeof(cl_uint), &queue_count, NULL);
 			printf("after %s %d create queue; QUEUE COUNT: %d\n", label, y, queue_count);
 		
 			if (*ciErrNum != CL_SUCCESS){
 				printf (" Error %i in clCreateCommandQueue call: %s !!!\n\n", *ciErrNum, GetErrorCode(*ciErrNum));
-            	return false;
-            }		
+				return false;
+			}
 	    }
 		
-		
+		/*
 		*queue = (cl_command_queue *) &new_queue;
 		*devices = (cl_device_id *) &new_devices;
-		
-		/* *queue = (magma_queue_t *) new magma_queue_t[n_device];
+		*/
+		/*
+		*queue = (magma_queue_t *) new magma_queue_t[n_device];
 		*devices = (cl_device_id *) new cl_device_id[n_device];
-		memcpy(*queue, &new_queue, sizeof(new_queue));
-		memcpy(*devices, &new_devices, sizeof(new_devices));
+		memcpy(*queue, &new_queue, sizeof(cl_command_queue)*n_device);
+		memcpy(*devices, &new_devices, sizeof(cl_device_id)*n_device);
 		delete [] new_queue;
 		delete [] new_devices;*/
 		
