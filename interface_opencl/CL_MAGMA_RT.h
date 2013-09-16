@@ -18,6 +18,8 @@
 
 //--- OPENCL PLATFORM CLASS --- //
 
+class CL_MAGMA_RT;
+
 class cl_platform {
 	
 	private:
