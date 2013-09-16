@@ -7,8 +7,6 @@
 #include <stdexcept>      // std::out_of_range
 #include <errno.h>
 
-#include <cl.h>
-
 using std::string;
 using std::ofstream;
 using std::ifstream;
@@ -271,7 +269,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 		
 	    for(unsigned int y = 0; y < n_device; y++ ) {
 			cl_uint queue_count;
-			clGetDeviceInfo(new_devices[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
+			clGetDeviceInfo(*devices[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
 			printf("\t- %s Device %s\n", label, chBuffer);
 			// create command queue
 			*queue[y] = clCreateCommandQueue(*context, *devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
