@@ -8,64 +8,6 @@
 #include <sys/stat.h>
 #include <algorithm>
 
-
-
-//BELGIOVINE
-//#include <starpu.h>
-//#include <starpu_opencl.h>
-
-#include "magma.h"
-
-//--- OPENCL PLATFORM CLASS --- //
-
-class CL_MAGMA_RT;
-
-class cl_platform {
-	
-	private:
-		cl_platform_id 		platform;
-		cl_uint 		n_gpu;
-		cl_uint 		n_cpu;
-		cl_uint 		n_acc;
-		cl_context	 	gpu_context;
-		cl_context	 	cpu_context;
-		cl_context	 	acc_context;
-		cl_device_id*		gpu_devices;	//GPU devices
-		cl_command_queue*	gpu_queue;
-		cl_device_id*		cpu_devices;	//CPU	
-		cl_command_queue*	cpu_queue;
-		cl_device_id*		acc_devices;	//ACCELERATOR
-		cl_command_queue*	acc_queue;
-	
-	public:
-		cl_platform();	//constructor
-		cl_platform(const cl_platform &old_platform);	//copy constructor
-		~cl_platform(); //destructor
-		friend struct FindPlatformID;
-		friend cl_platform_id CL_MAGMA_RT::SetPlatform(uint platformid, cl_device_type device_type);
-		friend cl_int CL_MAGMA_RT::initPlatform(const cl_platform_id src_platform);
-};
-
-//classe per la ricerca dell'indice della piattaforma
-struct FindPlatformID {
-    const cl_platform_id platform;
-    FindPlatformID(const cl_platform_id& ptr) : platform(ptr) {}
-    bool operator()(const cl_platform& i) const { 
-        return i.platform == platform; 
-    }
-};
-
-bool fileExists(const std::string& filename)
-{
-    struct stat buf;
-    if (stat(filename.c_str(), &buf) != -1)
-    {
-        return true;
-    }
-    return false;
-}
-//BELGIOVINE end
-
 class CL_MAGMA_RT
 {
 	private:
@@ -165,5 +107,61 @@ class CL_MAGMA_RT
 };
 
 extern CL_MAGMA_RT *rt;
+
+//BELGIOVINE
+//#include <starpu.h>
+//#include <starpu_opencl.h>
+
+#include "magma.h"
+
+//--- OPENCL PLATFORM CLASS --- //
+
+
+class cl_platform {
+	
+	private:
+		cl_platform_id 		platform;
+		cl_uint 		n_gpu;
+		cl_uint 		n_cpu;
+		cl_uint 		n_acc;
+		cl_context	 	gpu_context;
+		cl_context	 	cpu_context;
+		cl_context	 	acc_context;
+		cl_device_id*		gpu_devices;	//GPU devices
+		cl_command_queue*	gpu_queue;
+		cl_device_id*		cpu_devices;	//CPU	
+		cl_command_queue*	cpu_queue;
+		cl_device_id*		acc_devices;	//ACCELERATOR
+		cl_command_queue*	acc_queue;
+	
+	public:
+		cl_platform();	//constructor
+		cl_platform(const cl_platform &old_platform);	//copy constructor
+		~cl_platform(); //destructor
+		friend struct FindPlatformID;
+		friend cl_platform_id CL_MAGMA_RT::SetPlatform(uint platformid, cl_device_type device_type);
+		friend bool CL_MAGMA_RT::Init ();
+		friend bool CL_MAGMA_RT::InitAll();
+};
+
+//classe per la ricerca dell'indice della piattaforma
+struct FindPlatformID {
+    const cl_platform_id platform;
+    FindPlatformID(const cl_platform_id& ptr) : platform(ptr) {}
+    bool operator()(const cl_platform& i) const { 
+        return i.platform == platform; 
+    }
+};
+
+bool fileExists(const std::string& filename)
+{
+    struct stat buf;
+    if (stat(filename.c_str(), &buf) != -1)
+    {
+        return true;
+    }
+    return false;
+}
+//BELGIOVINE end
 
 #endif        //  #ifndef CL_MAGMA_RT_H
