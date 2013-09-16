@@ -44,6 +44,7 @@ class CL_MAGMA_RT
 		//BELGIOVINE
 		bool initDevices(const cl_platform_id src_platform, cl_device_id** devices, cl_context* context, cl_uint* num, cl_command_queue** queue, cl_device_type device_type, cl_uint max_ndev, cl_int* ciErrNum, char* label);
 		cl_int initPlatform(const cl_platform_id src_platform);
+		friend class cl_platform;
 		//BELGIOVINE end
 
 		CL_MAGMA_RT();                                 // Private constructor
