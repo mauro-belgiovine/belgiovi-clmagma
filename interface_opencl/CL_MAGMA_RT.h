@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <algorithm>
 
+class cl_platform;
+
 class CL_MAGMA_RT
 {
 	private:
