@@ -241,7 +241,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
     printf(" %u %s devices found supporting OpenCL:\n\n", n_device, label);
     *devices = new cl_device_id[n_device];
 	
-    if(new_devices == NULL){  
+    if(*devices == NULL){  
 		printf(" Failed to allocate memory for devices !!!\n\n");
 		return false;
     }else{
