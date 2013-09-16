@@ -151,15 +151,15 @@ cl_platform_id CL_MAGMA_RT::SetPlatform(uint platformid, cl_device_type device_t
       
       case CL_DEVICE_TYPE_CPU:
 		if(platform.n_cpu > 0){
-		cxGPUContext  = platform.cpu_context;
-		commandQueue  = platform.cpu_queue;
-		cdDevices = platform.cpu_devices;
-		ciDeviceCount = platform.n_cpu;
-		dev_type = CL_DEVICE_TYPE_CPU;
-		platform_id = platformid;
-		out_p = platform.platform;
+			cxGPUContext  = platform.cpu_context;
+			commandQueue  = platform.cpu_queue;
+			cdDevices = platform.cpu_devices;
+			ciDeviceCount = platform.n_cpu;
+			dev_type = CL_DEVICE_TYPE_CPU;
+			platform_id = platformid;
+			out_p = platform.platform;
 		}else {
-		std::cerr << "[WARNING] CPUs not found in platform " << platformid << ": you should try setting default GPUs Platform\n";
+			std::cerr << "[WARNING] CPUs not found in platform " << platformid << ": you should try setting default GPUs Platform\n";
 		}
 		break;
 	
