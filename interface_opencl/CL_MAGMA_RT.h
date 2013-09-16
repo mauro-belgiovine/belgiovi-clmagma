@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <algorithm>
 
+#include "magma.h"
+
 class cl_platform;
 
 class CL_MAGMA_RT
@@ -113,8 +115,6 @@ extern CL_MAGMA_RT *rt;
 //BELGIOVINE
 //#include <starpu.h>
 //#include <starpu_opencl.h>
-
-#include "magma.h"
 
 //--- OPENCL PLATFORM CLASS --- //
 
