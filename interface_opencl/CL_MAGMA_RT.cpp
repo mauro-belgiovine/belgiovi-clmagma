@@ -273,7 +273,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 		
 		for(unsigned int y = 0; y < n_device; y++ ) {
 			    cl_uint queue_count;
-			    *ciErrNum =  clGetDeviceInfo(*devices[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
+			    *ciErrNum =  clGetDeviceInfo((*devices)[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
 			    
 			    if (*ciErrNum != CL_SUCCESS){
 				    printf (" Error %i in clGetDeviceInfo call: %s !!!\n\n", *ciErrNum, GetErrorCode(*ciErrNum));
@@ -282,7 +282,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 			    
 			    printf("\t- %s Device %s\n", label, chBuffer);
 			    // create command queue
-			    *queue[y] = clCreateCommandQueue(*context, *devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
+			    (*queue)[y] = clCreateCommandQueue(*context, (*devices)[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
 			    clGetCommandQueueInfo(*queue[y], CL_QUEUE_REFERENCE_COUNT, sizeof(cl_uint), &queue_count, NULL);
 			    printf("after %s %d create queue; QUEUE COUNT: %d\n", label, y, queue_count);
 		    

@@ -142,8 +142,7 @@ class cl_platform {
 		cl_platform(const cl_platform &old_platform);	//copy constructor
 		~cl_platform(); //destructor
 		friend struct FindPlatformID;
-		friend cl_platform_id CL_MAGMA_RT::SetPlatform(uint platformid, cl_device_type device_type);
-		friend cl_int CL_MAGMA_RT::initPlatform(const cl_platform_id src_platform);
+		friend class CL_MAGMA_RT;
 };
 
 //classe per la ricerca dell'indice della piattaforma
