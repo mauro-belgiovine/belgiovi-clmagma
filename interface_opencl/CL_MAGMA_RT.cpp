@@ -238,7 +238,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 	 
     printf(" %u %s devices found supporting OpenCL:\n\n", n_device, label);
     
-    *devices = new cl_device_id[n_device];
+    *devices = (cl_device_id *) new cl_device_id[n_device];
 	
     if(*devices == NULL){  
 		printf(" Failed to allocate memory for devices !!!\n\n");
@@ -273,7 +273,13 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 		
 		for(unsigned int y = 0; y < n_device; y++ ) {
 			    cl_uint queue_count;
-			    clGetDeviceInfo(*devices[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
+			    *ciErrNum =  clGetDeviceInfo(*devices[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
+			    
+			    if (*ciErrNum != CL_SUCCESS){
+				    printf (" Error %i in clGetDeviceInfo call: %s !!!\n\n", *ciErrNum, GetErrorCode(*ciErrNum));
+				    return false;
+			    }
+			    
 			    printf("\t- %s Device %s\n", label, chBuffer);
 			    // create command queue
 			    *queue[y] = clCreateCommandQueue(*context, *devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
