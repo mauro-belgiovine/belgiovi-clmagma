@@ -237,6 +237,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
   }else{// Get and log the OpenCL device ID's
 	 
     printf(" %u %s devices found supporting OpenCL:\n\n", n_device, label);
+    
     *devices = new cl_device_id[n_device];
 	
     if(*devices == NULL){  
@@ -251,6 +252,9 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 	  //Create a context for the devices
 	  cl_context_properties properties[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties) src_platform, 0 };
 	  *context = clCreateContext( properties, n_device, *devices, NULL, NULL, ciErrNum );
+	  
+	  clGetContextInfo(*context, CL_CONTEXT_NUM_DEVICES, sizeof(cl_uint), &n_device, NULL);
+	  printf("context info: %d devices\n", n_device);
 
 	  if (*ciErrNum != CL_SUCCESS){
 	    printf("Error %i in clCreateContext (%s) call !!!\n\n", *ciErrNum, label);
@@ -267,20 +271,20 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 			return false;
 		}
 		
-	    for(unsigned int y = 0; y < n_device; y++ ) {
-			cl_uint queue_count;
-			//clGetDeviceInfo(*devices[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
-			//printf("\t- %s Device %s\n", label, chBuffer);
-			// create command queue
-			*queue[y] = clCreateCommandQueue(*context, *devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
-			clGetCommandQueueInfo(*queue[y], CL_QUEUE_REFERENCE_COUNT, sizeof(cl_uint), &queue_count, NULL);
-			printf("after %s %d create queue; QUEUE COUNT: %d\n", label, y, queue_count);
-		
-			if (*ciErrNum != CL_SUCCESS){
-				printf (" Error %i in clCreateCommandQueue call: %s !!!\n\n", *ciErrNum, GetErrorCode(*ciErrNum));
-				return false;
-			}
-	    }
+		for(unsigned int y = 0; y < n_device; y++ ) {
+			    cl_uint queue_count;
+			    //clGetDeviceInfo(*devices[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
+			    //printf("\t- %s Device %s\n", label, chBuffer);
+			    // create command queue
+			    *queue[y] = clCreateCommandQueue(*context, *devices[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
+			    clGetCommandQueueInfo(*queue[y], CL_QUEUE_REFERENCE_COUNT, sizeof(cl_uint), &queue_count, NULL);
+			    printf("after %s %d create queue; QUEUE COUNT: %d\n", label, y, queue_count);
+		    
+			    if (*ciErrNum != CL_SUCCESS){
+				    printf (" Error %i in clCreateCommandQueue call: %s !!!\n\n", *ciErrNum, GetErrorCode(*ciErrNum));
+				    return false;
+			    }
+		}
 		
 		/*
 		*queue = (cl_command_queue *) &new_queue;
