@@ -65,16 +65,24 @@ inline cl_platform::cl_platform(const cl_platform &old_platform){
 
 inline cl_platform::~cl_platform(){
 	
-	for(uint y = 0; y < n_gpu; y++) clReleaseCommandQueue(gpu_queue[y]);
-	if (gpu_queue)	delete [] gpu_queue;
+	if (gpu_queue){
+		for(uint y = 0; y < n_gpu; y++) clReleaseCommandQueue(gpu_queue[y]);
+		delete [] gpu_queue;
+	}
 	if(gpu_devices)	delete [] gpu_devices;
 	if(gpu_context)	clReleaseContext(gpu_context);
-	for(uint y = 0; y < n_cpu; y++) clReleaseCommandQueue(cpu_queue[y]);
-	if (cpu_queue)	delete [] cpu_queue;
+	
+	if (cpu_queue)	{
+		for(uint y = 0; y < n_cpu; y++) clReleaseCommandQueue(cpu_queue[y]);
+		delete [] cpu_queue;
+	}
 	if(cpu_devices)	delete [] cpu_devices;
 	if(cpu_context)	clReleaseContext(cpu_context);
-	for(uint y = 0; y < n_acc; y++) clReleaseCommandQueue(acc_queue[y]);
-	if (acc_queue)	delete [] acc_queue;
+	
+	if (acc_queue){
+		for(uint y = 0; y < n_acc; y++) clReleaseCommandQueue(acc_queue[y]);
+		delete [] acc_queue;
+	}
 	if(acc_devices)	delete [] acc_devices;
 	if(acc_context)	clReleaseContext(acc_context);
 }
