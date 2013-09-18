@@ -317,6 +317,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
      
   
   }
+  fflush(stdout);
   return true;
 }
 
