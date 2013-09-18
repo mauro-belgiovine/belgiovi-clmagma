@@ -283,7 +283,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 			    printf("\t- %s Device %s\n", label, chBuffer);
 			    // create command queue
 			    (*queue)[y] = clCreateCommandQueue(*context, (*devices)[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
-			    clGetCommandQueueInfo(*queue[y], CL_QUEUE_REFERENCE_COUNT, sizeof(cl_uint), &queue_count, NULL);
+			    clGetCommandQueueInfo((*queue)[y], CL_QUEUE_REFERENCE_COUNT, sizeof(cl_uint), &queue_count, NULL);
 			    printf("after %s %d create queue; QUEUE COUNT: %d\n", label, y, queue_count);
 		    
 			    if (*ciErrNum != CL_SUCCESS){
