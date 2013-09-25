@@ -71,7 +71,7 @@ class CL_MAGMA_RT
 		
 		cl_device_id * GetDevicePtr();
 		cl_context GetContext();
-		cl_command_queue GetCommandQueue(int queueid);
+		cl_command_queue GetCommandQueue(uint queueid);
 		bool Init ();
 		//BELGIOVINE
 		bool InitAll();

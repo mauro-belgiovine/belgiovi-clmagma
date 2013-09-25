@@ -21,9 +21,9 @@ int main( int argc, char** argv )
 	  
 	  if (arch_compiling != NULL) runtime->CompileFile( argv[1] );
 	  
-	  /*arch_compiling = runtime->SetPlatform(i, CL_DEVICE_TYPE_CPU);
+	  arch_compiling = runtime->SetPlatform(i, CL_DEVICE_TYPE_CPU);
 	  
-	  if (arch_compiling != NULL) runtime->CompileFile( argv[1] );*/
+	  if (arch_compiling != NULL) runtime->CompileFile( argv[1] );
 	  
 	  arch_compiling = NULL;
 	}

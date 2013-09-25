@@ -64,27 +64,7 @@ inline cl_platform::cl_platform(const cl_platform &old_platform){
 }
 
 inline cl_platform::~cl_platform(){
-	
-	if (gpu_queue){
-		for(uint y = 0; y < n_gpu; y++) clReleaseCommandQueue(gpu_queue[y]);
-		delete [] gpu_queue;
-	}
-	if(gpu_devices)	delete [] gpu_devices;
-	if(gpu_context)	clReleaseContext(gpu_context);
-	
-	if (cpu_queue)	{
-		for(uint y = 0; y < n_cpu; y++) clReleaseCommandQueue(cpu_queue[y]);
-		delete [] cpu_queue;
-	}
-	if(cpu_devices)	delete [] cpu_devices;
-	if(cpu_context)	clReleaseContext(cpu_context);
-	
-	if (acc_queue){
-		for(uint y = 0; y < n_acc; y++) clReleaseCommandQueue(acc_queue[y]);
-		delete [] acc_queue;
-	}
-	if(acc_devices)	delete [] acc_devices;
-	if(acc_context)	clReleaseContext(acc_context);
+		
 }
 
 //------------------------------------------------------------------------------------------------//
@@ -204,9 +184,9 @@ size_t CL_MAGMA_RT::GetNumDevices()
   return (size_t) ciDeviceCount;
 }
 
-cl_command_queue CL_MAGMA_RT::GetCommandQueue(int queueid)
+cl_command_queue CL_MAGMA_RT::GetCommandQueue(uint queueid)
 {
-	return (queueid>=ciDeviceCount) ? NULL : commandQueue[queueid];
+	return (queueid >= ciDeviceCount) ? NULL : commandQueue[queueid];
 }
 
 magma_queue_t* CL_MAGMA_RT::GetQueuePtr()
@@ -280,7 +260,7 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 		}
 		
 		for(unsigned int y = 0; y < n_device; y++ ) {
-			    cl_uint queue_count;
+			
 			    *ciErrNum =  clGetDeviceInfo((*devices)[y], CL_DEVICE_NAME, sizeof(chBuffer), &chBuffer, NULL);
 			    
 			    if (*ciErrNum != CL_SUCCESS){
@@ -291,26 +271,12 @@ bool CL_MAGMA_RT::initDevices(const cl_platform_id src_platform, cl_device_id** 
 			    printf("\t- %s Device %s\n", label, chBuffer);
 			    // create command queue
 			    (*queue)[y] = clCreateCommandQueue(*context, (*devices)[y], CL_QUEUE_PROFILING_ENABLE, ciErrNum);
-			    clGetCommandQueueInfo((*queue)[y], CL_QUEUE_REFERENCE_COUNT, sizeof(cl_uint), &queue_count, NULL);
-			    printf("after %s %d create queue; QUEUE COUNT: %d\n", label, y, queue_count);
-		    
+
 			    if (*ciErrNum != CL_SUCCESS){
 				    printf (" Error %i in clCreateCommandQueue call: %s !!!\n\n", *ciErrNum, GetErrorCode(*ciErrNum));
 				    return false;
 			    }
 		}
-		
-		/*
-		*queue = (cl_command_queue *) &new_queue;
-		*devices = (cl_device_id *) &new_devices;
-		*/
-		/*
-		*queue = (magma_queue_t *) new magma_queue_t[n_device];
-		*devices = (cl_device_id *) new cl_device_id[n_device];
-		memcpy(*queue, &new_queue, sizeof(cl_command_queue)*n_device);
-		memcpy(*devices, &new_devices, sizeof(cl_device_id)*n_device);
-		delete [] new_queue;
-		delete [] new_devices;*/
 		
 	  }
 	  
@@ -339,7 +305,7 @@ cl_int CL_MAGMA_RT::initPlatform(const cl_platform_id src_platform){
   
   if(!cpPlatforms.empty()){
     cl_platform current;
-    for(cl_int i = 0; i < cpPlatforms.size(); i++){
+    for(cl_uint i = 0; i < cpPlatforms.size(); i++){
 		current = cpPlatforms.at(i);
 		if(current.platform == src_platform){
 			printf("Platform %d already stored. Nothing to do.\n", i);
@@ -535,7 +501,41 @@ bool CL_MAGMA_RT::Quit()
 	cxGPUContext = NULL;
 	
 	if(cpPlatforms.size() > 0) {
-	  
+		
+		for(uint y = 0; y < cpPlatforms.size(); ++y){
+			
+			current = cpPlatforms.at(y);
+			
+			if (current.cpu_queue)	{
+				for(uint y = 0; y < current.n_cpu; y++) clReleaseCommandQueue(current.cpu_queue[y]);
+			}
+			
+			if(current.cpu_context)	clReleaseContext(current.cpu_context);
+	
+			if (current.acc_queue){
+				for(uint y = 0; y < current.n_acc; y++) clReleaseCommandQueue(current.acc_queue[y]);
+			}
+			
+			if(current.acc_context)	clReleaseContext(current.acc_context);
+	
+			if (current.gpu_queue){
+				for(uint y = 0; y < current.n_gpu; y++)	clReleaseCommandQueue(current.gpu_queue[y]);
+			}
+			
+			if(current.gpu_context)	clReleaseContext(current.gpu_context);
+			
+			if (current.cpu_queue) delete [] current.cpu_queue;
+			if(current.cpu_devices)	delete [] current.cpu_devices;
+	
+			if (current.acc_queue) delete [] current.acc_queue;
+			if(current.acc_devices)	delete [] current.acc_devices;
+	
+			if (current.gpu_queue) delete [] current.gpu_queue;
+			if(current.gpu_devices)	delete [] current.gpu_devices;
+						
+			
+		}
+		
 	  cpPlatforms.clear();
 	  
 	}
